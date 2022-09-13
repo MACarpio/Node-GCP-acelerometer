@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <%- include("partials/head") %>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <%- include("partials/navigation") %>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+      <div class="card-mid" id="box">
+          <h2 class="card-title">Carrera</h2>
+          <div class="form_section">
+            <label for="metraje">Alumno</label><br>
+            <input type="text" value="<%= alumno %>" disabled="disabled">
+          </div>
+          <br>
+          <div class="form_section">
+            <label for="metraje">Metros de carrera</label><br>
+            <select name="" id="">
+              <option value="100">100</option>
+              <option value="150">150</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="card-mid" >
+        <div class="temporizador" id="tiempo">00:00:00.000</div> <br>
+        <% if(session){%>
+        <button type="button" class="btn btn-start" id="start">Start</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-stop" id="stop">Stop</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-restart" id="restart">Restart</button>
+        <br>
+        <br>
+        <p id="indicacion">Presione Start para dar inicio a la carrera</p>
+          <%}%>
+        
+      </div>
+    </div>
+    <div class="container">
+      <div class="card-mid" id="box">
+          <div class="container">
+            <table class="tab-datos">
+              <tr><td class="title-eje">Fecha: &nbsp;</td><td><span id="finit">--/--</span></td></tr>
+              <tr><td class="title-eje">Aceleración: &nbsp;</td><td><span id="accelerometer">0</span> m/s<sup>2</sup></td></tr>
+              <tr><td class="title-eje">Hora Inicio: &nbsp;</td><td><span id="hinit">--:--:--</span></td></tr>
+              <tr><td class="title-eje">Hora Fin: &nbsp;</td><td><span id="hfinal">--:--:--</span></td></tr>
+            </table>
+          </div>
+          <br>
+            <span class="Estado btn-restart" id="status"> Esperando la lectura </span><br>
+            <div id="result_acc"><br><i class="text-center fas fa-male fa-8x"></i></div>
+        </div> 
+    </div>
+    <br>
+    <br>
+    
+  <!-- sensor codigo -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+      try {
+        let accelerometer = null;
+        accelerometer = new LinearAccelerationSensor({ referenceFrame: 'device' , frequency:2});
+          // inicializar el acelerometro y la API socket.io
+          var socket = io.connect();
+          var restart = document.getElementById('restart');
+          var start = document.getElementById('start');
+          var stop = document.getElementById('stop');
+          var acel = document.getElementById('accelerometer');
+          var movimiento=document.getElementById('status');
+          var hfinal=document.getElementById('hfinal');
+          var hinit= document.getElementById('hinit');
+          var finit = document.getElementById('finit');
+          var indicacion = document.getElementById('indicacion');
+          var metraje = document.getElementById('metraje')
+
+          restart.setAttribute("disabled", "");
+          stop.setAttribute("disabled", "");
+          
+          walking = 0
+          var fechainicio='';
+          var estado='';
+          var horainicio='';
+          var horafinal='';
+          var tiempoRef = Date.now()
+          var cronometrar = false
+          var acumulado = 0
+          var i=0;
+
+          // Reconocimiento de errores
+          accelerometer.addEventListener('error', event => {
+              if (event.error.name === 'NotAllowedError') {
+                  alert('El navegador no permite usar los sensores');
+              } else if (event.error.name === 'NotReadableError' ) {
+                  alert('No se puede conectar con el sensor');
+              }
+          });
+
+          var alumno = document.getElementById('alumno');
+          function iniciar() {
+            cronometrar = true
+          }
+          
+          function pausar() {
+              cronometrar = false
+          }
+        
+          function reiniciar() {
+              acumulado = 0
+          }
+        
+          setInterval(() => {
+              let tiempo = document.getElementById("tiempo")
+              if (cronometrar) {
+                  acumulado += Date.now() - tiempoRef
+              }
+              tiempoRef = Date.now()
+              tiempo.innerHTML = formatearMS(acumulado)
+          }, 1000 / 60);
+        
+          function formatearMS(tiempo_ms) {
+              let MS = tiempo_ms % 1000
+              //Agregué la variable St para solucionar el problema de contar los minutos y horas.
+              let St = Math.floor(((tiempo_ms - MS) / 1000))
+
+              let S = St%60
+              let M = Math.floor((St / 60) % 60)
+              let H = Math.floor((St/60 / 60))
+              Number.prototype.ceros = function (n) {
+                  return (this + "").padStart(n, 0)
+              }
+            
+              return H.ceros(2) + ":" + M.ceros(2) + ":" + S.ceros(2)
+                  + "." + MS.ceros(3)
+          }
+
+          // handling reading and send elaborates values
+          accelerometer.addEventListener('reading', () => {
+            estado = 'Leyendo'
+            let x = accelerometer.x.toFixed(3);
+            let y = accelerometer.y.toFixed(3);
+            let z = accelerometer.z.toFixed(3);
+            let ace = Math.sqrt(x*x + y*y + z*z).toFixed(3);
+            acel.innerHTML=ace;
+            i++
+            if (ace > 0.6) {
+              walking = 1
+              movimiento.innerHTML ='Caminando';
+              result_acc.innerHTML = '<br><i class="text-center fas fa-running fa-10x"></i>'
+            } else {
+              walking = 0
+              movimiento.innerHTML ='Parado';
+              result_acc.innerHTML = '<br><i class="text-center fas fa-male fa-10x"></i>'
+            }
+            data={
+              dniAlum:alumno.value,
+              aceleracion:ace,
+              estado:estado,
+              tiempo:(acumulado/1000),
+              ritmo:i,
+              fechaReg:fechainicio,
+              distancia:metraje.options[metraje.selectedIndex].value,
+              HoraInicial:horainicio,
+              HoraFinal:horafinal
+            }
+            socket.emit('accelerometer', data);
+          });
+
+          // botón stop
+          stop.addEventListener("click", function( event ) {
+             estado = 'Resultado'
+             var fin = new Date();
+             horafinal=fin.getHours()+":"+fin.getMinutes()+":"+fin.getSeconds()+":"+fin.getMilliseconds();
+             accelerometer.stop()
+             i++
+             pausar();
+             hfinal.innerHTML=horafinal;
+             restart.removeAttribute("disabled");
+             stop.setAttribute("disabled", "");
+             indicacion.innerHTML= "Presione Restart para reiniciar la app";
+             data={
+              dniAlum:alumno.value,
+              aceleracion:0,
+              estado:estado,
+              tiempo:(acumulado/1000),
+              ritmo:i,
+              fechaReg:fechainicio,
+              distancia:metraje.options[metraje.selectedIndex].value,
+              HoraInicial:horainicio,
+              HoraFinal:horafinal
+            }
+             socket.emit('accelerometer', data);
+           });
+
+           // botón start
+            start.addEventListener("click", function( event ) {
+             socket.emit('iniciar');
+             estado = 'Inicio'
+             var fecha = new Date();
+             horainicio=fecha.getHours()+":"+fecha.getMinutes()+":"+fecha.getSeconds()+":"+fecha.getMilliseconds();
+             fechainicio=fecha.getFullYear() +"-"+(fecha.getMonth()+1)+"-"+fecha.getDate() ;
+             accelerometer.start()
+             indicacion.innerHTML= "Presione Stop para finalizar la carrera";
+             iniciar();
+             hinit.innerHTML=horainicio;
+             finit.innerHTML=fechainicio;
+             restart.setAttribute("disabled", "");
+             start.setAttribute("disabled", "");
+             metraje.setAttribute("disabled", "");
+             stop.removeAttribute("disabled");
+             data={
+              dniAlum:alumno.value,
+              aceleracion:0,
+              estado:estado,
+              tiempo:0,
+              ritmo:0,
+              fechaReg:fechainicio,
+              distancia:metraje.options[metraje.selectedIndex].value,
+              HoraInicial:horainicio,
+              HoraFinal:horafinal
+            }
+             socket.emit('accelerometer', data);
+             
+           });
+  
+           // botón restart
+           restart.addEventListener("click", function( event ) {
+            reiniciar();
+             i=0
+             restart.setAttribute("disabled", "");
+             start.removeAttribute("disabled");
+             metraje.removeAttribute("disabled");
+             movimiento.innerHTML="Esperando Lectura"
+             indicacion.innerHTML= "Presione Start para dar inicio a la carrera";
+             acel.innerHTML='0';
+             hinit.innerHTML='--:--:---';
+             finit.innerHTML='--/--';
+             hfinal.innerHTML='--:--:---';
+           });
+      } catch (error) {
+          if (error.name === 'SecurityError') {
+              alert('El uso del sensor esta bloqueado por seguridad.');
+          } else if (error.name === 'ReferenceError') {
+              alert('El sensor no es reconocido en su dispositivo');
+          } else {
+              throw error;
+          }
+      }
+    </script>
+  </body>
+</html>

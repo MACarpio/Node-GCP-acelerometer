@@ -1,0 +1,160 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;900&display=swap");
+
+* {
+  font-family: "Nunito Sans", sans-serif;
+  color: 212529;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  color: #222;
+}
+a {
+  text-decoration: none;
+}
+body {
+  background: #f1f1f1;
+  width: 100%;
+  height: 100%;
+}
+
+.nav {
+  box-shadow: 00 0 3px 0.5px #aaa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  height: 50px;
+  background-color: #fff;
+}
+.nav ul {
+  list-style: none;
+}
+.nav ul .nav_item {
+  display: inline-block;
+  padding: 0 10px;
+}
+.nav .nav_logo {
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-mid {
+  margin-top: 3%;
+  width: 80%;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  height: auto;
+  padding: 5%;
+  box-shadow: 00 0 5px 1px #ccc;
+  text-align: center;
+}
+.card-img {
+  width: 100%;
+  height: auto;
+}
+
+.card-img img {
+  width: 100%;
+  object-fit: cover;
+}
+.nav-link-btn {
+  box-shadow: 00 0 2px 1px #aaa;
+  padding: 2% 5%;
+  border-radius: 0.5rem;
+  color: #fff;
+}
+.nav-link-btn i {
+  color: #fff;
+}
+.bg-blue {
+  background: rgb(0, 102, 255);
+}
+.nav-link-btn:hover {
+  background: rgb(0, 74, 184);
+}
+.card-mid .card-title {
+  font-weight: 900;
+  font-size: 1.7rem;
+  margin-bottom: 0.2rem;
+}
+.form_section {
+  width: 100%;
+}
+.form_section select,
+.form_section input,
+.form_section textarea {
+  margin: 0.5rem 0;
+  width: 100%;
+  border-radius: 0.3rem;
+  text-align: center;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+.form_section label {
+  font-weight: 600;
+  color: #666;
+}
+
+.temporizador {
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 1.2rem;
+  display: inline-block;
+  margin-bottom: 1rem;
+  letter-spacing: 0.2rem;
+  border-radius: 0.3rem;
+}
+.btn {
+  padding: 10px;
+  border: none;
+  border-radius: 0.5rem;
+}
+.btn-start {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #ffffff;
+}
+.btn-stop {
+  background-color: #c82333;
+  border-color: #c82333;
+  color: #ffffff;
+}
+.btn-restart {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+.btn:disabled {
+  cursor: pointer;
+  opacity: 0.5;
+}
+#result_acc {
+  font-size: 17px;
+}
+.Estado {
+  border-radius: 3em;
+  padding: 2px 5px;
+}
+.table-result,
+.table-result td,
+.table-result tr {
+  border: 0.2px solid black;
+}
+.table-result td,
+.table-result tr {
+  padding: 2%;
+}
+.table-result {
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.txt2 {
+  z-index: 100;
+}
